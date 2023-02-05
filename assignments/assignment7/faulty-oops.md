@@ -1,5 +1,5 @@
 # echo "hello world" > /dev/faulty
-Unable to handle kernel NULL pointer dereference at virtual address 0000000000000000
+**Unable to handle kernel NULL pointer dereference at virtual address 0000000000000000**
 Mem abort info:
   ESR = 0x96000045
   EC = 0x25: DABT (current EL), IL = 32 bits
@@ -16,7 +16,7 @@ Modules linked in: faulty(O) hello(O) scull(O)
 CPU: 0 PID: 164 Comm: sh Tainted: G           O      5.15.18 #1
 Hardware name: linux,dummy-virt (DT)
 pstate: 80000005 (Nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-pc : faulty_write+0x14/0x20 [faulty]
+**pc : faulty_write+_0x14/0x20_ [faulty]**
 lr : vfs_write+0xa8/0x2a0
 sp : ffffffc008c83d80
 x29: ffffffc008c83d80 x28: ffffff80020d2640 x27: 0000000000000000
