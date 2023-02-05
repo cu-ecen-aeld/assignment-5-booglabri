@@ -1,5 +1,40 @@
-# echo "hello world" > /dev/faulty
-**Unable to handle kernel NULL pointer dereference at virtual address 0000000000000000**
+# Kernel Module faulty.ko Oops Analysis
+
+Command that generated the kernel oops:
+```
+echo "hello world" > /dev/faulty
+```
+Problem description:
+> The faulty kernel module made a NULL pointer dereference in function fault_write() at address 20 (0x14).
+> The pointer that is dereferenced is 32 bits (0x20).
+
+fault_write() assembly code snippet:
+<pre>
+Disassembly of section .text:
+
+0000000000000000 <faulty_write>:
+   0:	d503245f 	bti	c
+   4:	d2800001 	<b>mov	x1, <i>#0x0</i></b>                   	// #0
+   8:	d2800000 	mov	x0, #0x0                   	// #0
+   c:	d503233f 	paciasp
+  10:	d50323bf 	autiasp
+  <b>14:	b900003f 	str	wzr, [<i>x1</i>]</b>
+  18:	d65f03c0 	ret
+  1c:	d503201f 	nop
+</pre>
+fault_write() C code snippet:
+```C
+ssize_t faulty_write (struct file *filp, const char __user *buf, size_t count,
+		loff_t *pos)
+{
+	/* make a simple fault by dereferencing a NULL pointer */
+	*(int *)0 = 0;
+	return 0;
+}
+```
+Kernel oops output:
+<pre>
+<b>Unable to handle kernel NULL pointer dereference at virtual address 0000000000000000</b>
 Mem abort info:
   ESR = 0x96000045
   EC = 0x25: DABT (current EL), IL = 32 bits
@@ -16,7 +51,7 @@ Modules linked in: faulty(O) hello(O) scull(O)
 CPU: 0 PID: 164 Comm: sh Tainted: G           O      5.15.18 #1
 Hardware name: linux,dummy-virt (DT)
 pstate: 80000005 (Nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-**pc : faulty_write+_0x14/0x20_ [faulty]**
+pc : <b><i>faulty_write+0x14/0x20 [faulty]</i></b>
 lr : vfs_write+0xa8/0x2a0
 sp : ffffffc008c83d80
 x29: ffffffc008c83d80 x28: ffffff80020d2640 x27: 0000000000000000
@@ -41,3 +76,4 @@ Call trace:
  el0t_64_sync+0x1a0/0x1a4
 Code: d2800001 d2800000 d503233f d50323bf (b900003f) 
 ---[ end trace 40cc81ffd16fc890 ]---
+</pre>
