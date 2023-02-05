@@ -1,6 +1,7 @@
 
 config BR2_PACKAGE_LDD
 	bool "ldd"
+        depends on BR2_LINUX_KERNEL
 	help
 	  Includes LDD kernel modules examples.
 	  Used to understand buildroot external trees and kernel module package builds.
